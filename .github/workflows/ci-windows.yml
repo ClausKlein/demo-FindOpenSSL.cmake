@@ -1,0 +1,96 @@
+name: Windows GitHub CI
+
+on:
+  pull_request: []
+  push: []
+
+jobs:
+  build-program-with-FindOpenSSL-CMAKE_PREFIX_PATH:
+    strategy:
+      matrix:
+        platform:
+          - msvc-arch: x64
+            cmake-arch: x64
+            openssl-target: VC-WIN64A
+          - msvc-arch: x86
+            cmake-arch: Win32
+            openssl-target: VC-WIN32
+    runs-on: windows-latest
+    steps:
+      - name: install MSVC for ${{ matrix.platform.msvc-arch }}
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.platform.msvc-arch }}
+      - name: install NASM
+        uses: ilammy/setup-nasm@v1
+      - name: checkout program
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: checkout OpenSSL
+        uses: actions/checkout@v3
+        with:
+          repository: openssl/openssl
+          path: openssl
+      - name: configure OpenSSL for ${{matrix.platform.openssl-target}}
+        run: |
+          $cwd = Get-Location
+          mkdir ..\openssl-install
+          perl Configure ${{matrix.platform.openssl-target}} --prefix="$cwd\..\openssl-install"
+        working-directory: openssl
+      - name: build+install OpenSSL
+        run: nmake /S install_sw
+        working-directory: openssl
+      - name: configure the program for ${{ matrix.platform.cmake-arch }} using CMAKE_PREFIX_PATH
+        run: |
+          $cwd = Get-Location
+          cmake -A ${{ matrix.platform.cmake-arch }} -DCMAKE_PREFIX_PATH="$cwd\openssl-install" -S . -B _build
+      - name: build the program with Release config
+        run: cmake --build _build --config Release
+      - name: build the program with Debug config
+        run: cmake --build _build --config Debug
+
+  build-program-with-FindOpenSSL-OPENSSL_ROOT_DIR:
+    strategy:
+      matrix:
+        platform:
+          - msvc-arch: x64
+            cmake-arch: x64
+            openssl-target: VC-WIN64A
+          - msvc-arch: x86
+            cmake-arch: Win32
+            openssl-target: VC-WIN32
+    runs-on: windows-latest
+    steps:
+      - name: install MSVC for ${{ matrix.platform.msvc-arch }}
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.platform.msvc-arch }}
+      - name: install NASM
+        uses: ilammy/setup-nasm@v1
+      - name: checkout program
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: checkout OpenSSL
+        uses: actions/checkout@v3
+        with:
+          repository: openssl/openssl
+          path: openssl
+      - name: configure OpenSSL for ${{matrix.platform.openssl-target}}
+        run: |
+          $cwd = Get-Location
+          mkdir ..\openssl-install
+          perl Configure ${{matrix.platform.openssl-target}} --prefix="$cwd\..\openssl-install"
+        working-directory: openssl
+      - name: build+install OpenSSL
+        run: nmake /S install_sw
+        working-directory: openssl
+      - name: configure the program for ${{ matrix.platform.cmake-arch }} using OPENSSL_ROOT_DIR
+        run: |
+          $cwd = Get-Location
+          cmake -A ${{ matrix.platform.cmake-arch }} -DOPENSSL_ROOT_DIR="$cwd\openssl-install" -S . -B _build
+      - name: build the program with Release config
+        run: cmake --build _build --config Release
+      - name: build the program with Debug config
+        run: cmake --build _build --config Debug

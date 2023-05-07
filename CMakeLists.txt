@@ -1,0 +1,42 @@
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
+project(program LANGUAGES C)
+
+find_package(OpenSSL 3.0 REQUIRED)
+
+include(CMakePrintHelpers)
+foreach(V OPENSSL_INCLUDE_DIR
+          OPENSSL_CRYPTO_LIBRARY
+          OPENSSL_CRYPTO_LIBRARIES
+          OPENSSL_SSL_LIBRARY
+          OPENSSL_SSL_LIBRARIES
+          OPENSSL_LIBRARIES
+          OPENSSL_VERSION
+          OPENSSL_APPLINK_SOURCE)
+  cmake_print_variables(${V})
+endforeach()
+cmake_print_properties(
+  TARGETS
+    OpenSSL::Crypto
+    OpenSSL::SSL
+  PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES
+    IMPORTED_CONFIGURATIONS
+    IMPORTED_LINK_INTERFACE_LANGUAGES
+    IMPORTED_IMPLIB
+    IMPORTED_LOCATION
+    IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE
+    IMPORTED_LOCATION_RELEASE
+    IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG
+    IMPORTED_LOCATION_DEBUG
+    INTERFACE_LINK_LIBRARIES
+)
+cmake_print_properties(
+  TARGETS
+    OpenSSL::applink
+  PROPERTIES
+    INTERFACE_SOURCES
+)
+
+add_executable(program program.c)
+target_include_directories(program PRIVATE ${OPENSSL_INCLUDE_DIR})
+target_link_libraries(program PRIVATE OpenSSL::Crypto)
