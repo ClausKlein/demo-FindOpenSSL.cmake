@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.18...3.31)
 
 project(program LANGUAGES C)
 
-set(OPENSSL_DIRS /opt/local/lib/cmake /opt/local/lib/debug/cmake )
+if(NOT OPENSSL_INSTALL_PREFIX)
+    set(OPENSSL_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+endif()
+set(OPENSSL_DIRS ${OPENSSL_INSTALL_PREFIX}/lib/cmake /${OPENSSL_INSTALL_PREFIX}/lib64/cmake )
 find_package(OpenSSL 3.4 CONFIG REQUIRED NO_DEFAULT_PATH HINTS ${OPENSSL_DIRS})
 
 include(CMakePrintHelpers)
