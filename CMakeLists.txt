@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18...3.31)
 
 project(program LANGUAGES C)
 
-set(OPENSSL_DIRS /opt/local/lib/release/cmake /opt/local/lib/debug/cmake )
+set(OPENSSL_DIRS /opt/local/lib/cmake /opt/local/lib/debug/cmake )
 find_package(OpenSSL 3.4 CONFIG REQUIRED NO_DEFAULT_PATH HINTS ${OPENSSL_DIRS})
 
 include(CMakePrintHelpers)
