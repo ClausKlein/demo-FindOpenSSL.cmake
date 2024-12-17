@@ -5,8 +5,9 @@ project(program LANGUAGES C)
 if(NOT OPENSSL_INSTALL_PREFIX)
     set(OPENSSL_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 endif()
-set(OPENSSL_DIRS ${OPENSSL_INSTALL_PREFIX}/lib/cmake /${OPENSSL_INSTALL_PREFIX}/lib64/cmake )
+set(OPENSSL_DIRS ${OPENSSL_INSTALL_PREFIX}/lib/cmake ${OPENSSL_INSTALL_PREFIX}/lib64/cmake )
 find_package(OpenSSL 3.4 CONFIG REQUIRED NO_DEFAULT_PATH HINTS ${OPENSSL_DIRS})
+find_package(zlib 1.2 CONFIG REQUIRED NO_DEFAULT_PATH HINTS ${OPENSSL_DIRS})
 
 include(CMakePrintHelpers)
 foreach(
@@ -42,7 +43,7 @@ cmake_print_properties(
 
 add_executable(program program.c)
 target_include_directories(program PRIVATE ${OPENSSL_INCLUDE_DIR})
-target_link_libraries(program PRIVATE OpenSSL::Crypto)
+target_link_libraries(program PRIVATE OpenSSL::SSL zlib::zlib)
 
 enable_testing()
 set(CMAKE_SKIP_TEST_ALL_DEPENDENCY NO)
